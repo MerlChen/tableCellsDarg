@@ -57,8 +57,10 @@ function hideMenu(){
 function tableInfoSet(contentId){
 	var table = $("#"+contentId).find('table');
 	for(var i = 0,t = table.length; i < t ; i++){
+		//	判断当前Table是否存在ID,如果存在,就使用当前已存在的Id
 		if(table[i].attr("id").length > 0){
 			setTableCellsDrag(table[i].attr("id"));
+			//	否则利用随机数,给其赋予一个Id
 		} else{
 			table[i].id = "table_" + (Math.random().toFixed(8)*100000000);
 			setTableCellsDrag(table[i].id);
