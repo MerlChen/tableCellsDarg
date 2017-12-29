@@ -1,0 +1,60 @@
+#rightMenu {
+    position: absolute;
+}
+
+#rightMenu ul {
+    margin: 0;
+    padding: 0;
+    width: 160px;
+    background: #FFFFFF;
+    box-shadow: 5px 4px 8px rgba(0, 0, 0, 0.6);
+    border-radius: 5px;
+}
+
+#rightMenu li {
+    height: 32px;
+    cursor: pointer;
+    line-height: 32px;
+    color: #666666;
+    padding-left: 10px;
+    list-style: none;
+}
+
+#rightMenu li div {
+    display: inline-block;
+    overflow: hidden;
+    position: relative;
+    float: left;
+}
+
+#rightMenu li i {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-top: 1px solid #999;
+    border-right: 1px solid #999;
+    transform: rotate(45deg);
+    position: relative;
+    margin-top: 11px;
+    margin-right: 20px;
+    float: right;
+}
+
+#rightMenu li:hover {
+    background: #dedede;
+    color: #000000;
+}
+#rightMenu ul li ul {
+    display: none;
+    margin-left: 150px;
+    margin-top: 0;
+    overflow: hidden;
+    position: absolute;
+}
+#rightMenu li:hover ul {
+    display: block;
+}
+#rightMenu ul li ul li {
+    float: left;
+    width: 100%;
+}
