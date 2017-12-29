@@ -22,19 +22,16 @@
             //检测传递过来的tId是单个还是多个,多个需要以数组的形式进行传递
             if (typeof tId === 'object' && !isNaN(tId.length)) {
                 tId.each(function (index, item) {
-                    setContextMenu(item);
                     setTableCellsDrag(item);
                 });
                 //对单个表格执行列宽拖拽调整
             } else {
-                setContextMenu(tId);
                 setTableCellsDrag(tId);
             }
             //  指定DOM元素，对该元素下的所有表格进行列宽拖拽调整
         } else if (tId === null && domId && domId !== null) {
             var tableList = $("#" + domId).find("table");
             tableList.each(function (index, item) {
-                setContextMenu(item.id);
                 setTableCellsDrag(item.id);
             });
         }
@@ -177,7 +174,6 @@
     //  根据当前鼠标右键的元素进行判断，如果是表格内，那么重置自定义菜单的位置，否则移除自定义右键菜单
     window.document.oncontextmenu = function (e) {
         if (e.target.localName === 'td' || e.target.localName === 'th') {
-            setRightMenu(e);
         } else {
             hideRightMenu();
         }
