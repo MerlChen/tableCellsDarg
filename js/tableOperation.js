@@ -196,9 +196,9 @@
 
     //  当触发点击操作时，隐藏掉右键菜单
     $(window).click(function (e) {
+        var thisId = e.target.id ? e.target.id : "";
         $operationList.forEach(function (item) {
             if (thisId === item) {
-                var thisId = e.target.id ? e.target.id : "";
                 for (var i = 0; i < $domInfo.table.rows[0].cells.length; i++) {
                     if ($domInfo.table.rows[0].cells[i].colSpan > 1) {
                         $tableCells = $tableCells + $domInfo.table.rows[0].cells[i].colSpan - 1;
@@ -211,7 +211,6 @@
                     // 给当前行的上一行增加一行
                     var newRow = $domInfo.table.insertRow($domInfo.rowIndex);
                     //  给当前新增的行，插入对应的列数
-                    console.log($tableCells);
                     for (var newCell = 0; newCell < $tableCells; newCell++) {
                         newRow.insertCell(newCell).style.height = '20px';
                     }
