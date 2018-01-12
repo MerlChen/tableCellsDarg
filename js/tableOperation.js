@@ -9,6 +9,7 @@
     $rightList = null;
     $domInfo = {};
     $tableCells = 0;
+    $operationList = ["addRowBefore", "addRowAfter", "deleteRow", "addColLeft", "addColRight", "deleteCol", "mergeBefore", "mergeAfter", "mergeLeft", "mergeRight", "splitCol", "splitRow", "fullSplit"];
 
     function init(tId, domId) {
         //  初始化将CSS文件引入,方便对自定义右键菜单进行样式设置，无需手工引入
@@ -195,90 +196,97 @@
 
     //  当触发点击操作时，隐藏掉右键菜单
     $(window).click(function (e) {
-        var thisId = e.target.id ? e.target.id : "";
-        for (var i = 0; i < $domInfo.table.rows[0].cells.length; i++) {
-            if ($domInfo.table.rows[0].cells[i].colSpan > 1) {
-                $tableCells = $tableCells + $domInfo.table.rows[0].cells[i].colSpan - 1;
-            } else {
-                $tableCells = $tableCells + 1;
+        $operationList.forEach(function (item) {
+            if (thisId === item) {
+                var thisId = e.target.id ? e.target.id : "";
+                for (var i = 0; i < $domInfo.table.rows[0].cells.length; i++) {
+                    if ($domInfo.table.rows[0].cells[i].colSpan > 1) {
+                        $tableCells = $tableCells + $domInfo.table.rows[0].cells[i].colSpan - 1;
+                    } else {
+                        $tableCells = $tableCells + 1;
+                    }
+                }
+                //  上插入行
+                if (thisId === 'addRowBefore') {
+                    // 给当前行的上一行增加一行
+                    var newRow = $domInfo.table.insertRow($domInfo.rowIndex);
+                    //  给当前新增的行，插入对应的列数
+                    console.log($tableCells);
+                    for (var newCell = 0; newCell < $tableCells; newCell++) {
+                        newRow.insertCell(newCell).style.height = '20px';
+                    }
+                }
+                //  下插入行
+                if (thisId === 'addRowAfter') {
+                    // 给当前行的下一行增加一行
+                    var newRow = $domInfo.table.insertRow($domInfo.rowIndex + 1);
+                    //  给当前新增的行，插入对应的列数
+                    for (var newCell = 0; newCell < $tableCells; newCell++) {
+                        newRow.insertCell(newCell).style.height = '20px';
+                    }
+                }
+                //  左插入列
+                if (thisId === 'addColLeft') {
+                    //  给当前列的左侧增加一列
+                    for (var i = 0; i < $domInfo.table.rows.length; i++) {
+                        $domInfo.table.rows[i].insertCell($domInfo.cellIndex).style.width = '10%';
+                    }
+                }
+                //  右插入列
+                if (thisId === 'addColRight') {
+                    //  给当前列的右侧增加一列
+                    for (var i = 0; i < $domInfo.table.rows.length; i++) {
+                        $domInfo.table.rows[i].insertCell($domInfo.cellIndex + 1).style.width = '10%';
+                    }
+                }
+                //  删除此行
+                if (thisId === 'deleteRow') {
+                    $domInfo.table.rows[$domInfo.rowIndex].remove();
+                }
+                //  删除此列
+                if (thisId === 'deleteCol') {
+                    //  遍历表格的每一行，依次删除当前列
+                    for (var i = 0; i < $domInfo.table.rows.length; i++) {
+                        $domInfo.table.rows[i].cells[$domInfo.cellIndex].remove();
+                    }
+                }
+                //  向左合并
+                if (thisId === 'mergeLeft') {
+                    //  当前单元格与左侧单元格进行单元格合并，内容值合并
+                    $domInfo.table.rows[$domInfo.rowIndex].cells[$domInfo.cellIndex].innerHTML = $domInfo.table.rows[$domInfo.rowIndex].cells[$domInfo.cellIndex].innerHTML + $domInfo.table.rows[$domInfo.rowIndex].cells[$domInfo.cellIndex - 1].innerHTML;
+                    $domInfo.table.rows[$domInfo.rowIndex].cells[$domInfo.cellIndex].colSpan = $domInfo.table.rows[$domInfo.rowIndex].cells[$domInfo.cellIndex].colSpan + $domInfo.table.rows[$domInfo.rowIndex].cells[$domInfo.cellIndex - 1].colSpan;
+                    $domInfo.table.rows[$domInfo.rowIndex].cells[$domInfo.cellIndex - 1].remove();
+                }
+                //  向右合并
+                if (thisId === 'mergeRight') {
+                    //  当前单元格与右侧单元格进行单元格合并，内容值合并
+                    $domInfo.table.rows[$domInfo.rowIndex].cells[$domInfo.cellIndex].innerHTML = $domInfo.table.rows[$domInfo.rowIndex].cells[$domInfo.cellIndex].innerHTML + $domInfo.table.rows[$domInfo.rowIndex].cells[$domInfo.cellIndex + 1].innerHTML;
+                    $domInfo.table.rows[$domInfo.rowIndex].cells[$domInfo.cellIndex].colSpan = $domInfo.table.rows[$domInfo.rowIndex].cells[$domInfo.cellIndex].colSpan + $domInfo.table.rows[$domInfo.rowIndex].cells[$domInfo.cellIndex + 1].colSpan;
+                    $domInfo.table.rows[$domInfo.rowIndex].cells[$domInfo.cellIndex + 1].remove();
+                }
+                //  向下合并
+                if (thisId === 'mergeAfter') {
+                    //  将当前单元格与下方单元格进行单元格合并，内容值合并
+                    $domInfo.table.rows[$domInfo.rowIndex].cells[$domInfo.cellIndex].innerHTML = $domInfo.table.rows[$domInfo.rowIndex].cells[$domInfo.cellIndex].innerHTML + $domInfo.table.rows[$domInfo.rowIndex + 1].cells[$domInfo.cellIndex].innerHTML;
+                    $domInfo.table.rows[$domInfo.rowIndex].cells[$domInfo.cellIndex].rowSpan = $domInfo.table.rows[$domInfo.rowIndex].cells[$domInfo.cellIndex].rowSpan + $domInfo.table.rows[$domInfo.rowIndex + 1].cells[$domInfo.cellIndex].rowSpan;
+                    $domInfo.table.rows[$domInfo.rowIndex + 1].cells[$domInfo.cellIndex].remove();
+                }
+                //  拆分成列
+                if (thisId === 'splitCol') {
+                    //  将当前单元格拆分成若干小单元格
+                    for (var i = 1; i < $domInfo.table.rows[$domInfo.rowIndex].cells[$domInfo.cellIndex].colSpan; i++) {
+                        $($domInfo.table.rows[$domInfo.rowIndex].cells[$domInfo.cellIndex]).after($domInfo.table.rows[$domInfo.rowIndex].insertCell($domInfo.cellIndex));
+                    }
+                    $domInfo.table.rows[$domInfo.rowIndex].cells[$domInfo.cellIndex].colSpan = 1;
+                }
+                //  拆分成行
+                if (this.id === 'splitRow') {
+
+                }
+                $tableCells = 0;
+                setTableCellsDrag($domInfo.table.id);
             }
-        }
-        //  上插入行
-        if (thisId === 'addRowBefore') {
-            // 给当前行的上一行增加一行
-            var newRow = $domInfo.table.insertRow($domInfo.rowIndex);
-            //  给当前新增的行，插入对应的列数
-            for (var newCell = 0; newCell < $tableCells; newCell++) {
-                newRow.insertCell(newCell).style.height = '20px';
-            }
-        }
-        //  下插入行
-        if (thisId === 'addRowAfter') {
-            // 给当前行的下一行增加一行
-            var newRow = $domInfo.table.insertRow($domInfo.rowIndex + 1);
-            //  给当前新增的行，插入对应的列数
-            for (var newCell = 0; newCell < $tableCells; newCell++) {
-                newRow.insertCell(newCell).style.height = '20px';
-            }
-        }
-        //  左插入列
-        if (thisId === 'addColLeft') {
-            //  给当前列的左侧增加一列
-            for (var i = 0; i < $domInfo.table.rows.length; i++) {
-                $domInfo.table.rows[i].insertCell($domInfo.cellIndex).style.width = '10%';
-            }
-        }
-        //  右插入列
-        if (thisId === 'addColRight') {
-            //  给当前列的右侧增加一列
-            for (var i = 0; i < $domInfo.table.rows.length; i++) {
-                $domInfo.table.rows[i].insertCell($domInfo.cellIndex + 1).style.width = '10%';
-            }
-        }
-        //  删除此行
-        if (thisId === 'deleteRow') {
-            $domInfo.table.rows[$domInfo.rowIndex].remove();
-        }
-        //  删除此列
-        if (thisId === 'deleteCol') {
-            //  遍历表格的每一行，依次删除当前列
-            for (var i = 0; i < $domInfo.table.rows.length; i++) {
-                $domInfo.table.rows[i].cells[$domInfo.cellIndex].remove();
-            }
-        }
-        //  向左合并
-        if (thisId === 'mergeLeft') {
-            //  当前单元格与左侧单元格进行单元格合并，内容值合并
-            $domInfo.table.rows[$domInfo.rowIndex].cells[$domInfo.cellIndex].innerHTML = $domInfo.table.rows[$domInfo.rowIndex].cells[$domInfo.cellIndex].innerHTML + $domInfo.table.rows[$domInfo.rowIndex].cells[$domInfo.cellIndex - 1].innerHTML;
-            $domInfo.table.rows[$domInfo.rowIndex].cells[$domInfo.cellIndex].colSpan = $domInfo.table.rows[$domInfo.rowIndex].cells[$domInfo.cellIndex].colSpan + $domInfo.table.rows[$domInfo.rowIndex].cells[$domInfo.cellIndex - 1].colSpan;
-            $domInfo.table.rows[$domInfo.rowIndex].cells[$domInfo.cellIndex - 1].remove();
-        }
-        //  向右合并
-        if (thisId === 'mergeRight') {
-            //  当前单元格与右侧单元格进行单元格合并，内容值合并
-            $domInfo.table.rows[$domInfo.rowIndex].cells[$domInfo.cellIndex].innerHTML = $domInfo.table.rows[$domInfo.rowIndex].cells[$domInfo.cellIndex].innerHTML + $domInfo.table.rows[$domInfo.rowIndex].cells[$domInfo.cellIndex + 1].innerHTML;
-            $domInfo.table.rows[$domInfo.rowIndex].cells[$domInfo.cellIndex].colSpan = $domInfo.table.rows[$domInfo.rowIndex].cells[$domInfo.cellIndex].colSpan + $domInfo.table.rows[$domInfo.rowIndex].cells[$domInfo.cellIndex + 1].colSpan;
-            $domInfo.table.rows[$domInfo.rowIndex].cells[$domInfo.cellIndex + 1].remove();
-        }
-        //  向下合并
-        if (thisId === 'mergeAfter') {
-            //  将当前单元格与下方单元格进行单元格合并，内容值合并
-            $domInfo.table.rows[$domInfo.rowIndex].cells[$domInfo.cellIndex].innerHTML = $domInfo.table.rows[$domInfo.rowIndex].cells[$domInfo.cellIndex].innerHTML + $domInfo.table.rows[$domInfo.rowIndex + 1].cells[$domInfo.cellIndex].innerHTML;
-            $domInfo.table.rows[$domInfo.rowIndex].cells[$domInfo.cellIndex].rowSpan = $domInfo.table.rows[$domInfo.rowIndex].cells[$domInfo.cellIndex].rowSpan + $domInfo.table.rows[$domInfo.rowIndex + 1].cells[$domInfo.cellIndex].rowSpan;
-            $domInfo.table.rows[$domInfo.rowIndex + 1].cells[$domInfo.cellIndex].remove();
-        }
-        //  拆分成列
-        if (thisId === 'splitCol') {
-            //  将当前单元格拆分成若干小单元格
-            for (var i = 1; i < $domInfo.table.rows[$domInfo.rowIndex].cells[$domInfo.cellIndex].colSpan; i++) {
-                $($domInfo.table.rows[$domInfo.rowIndex].cells[$domInfo.cellIndex]).after($domInfo.table.rows[$domInfo.rowIndex].insertCell($domInfo.cellIndex));
-            }
-            $domInfo.table.rows[$domInfo.rowIndex].cells[$domInfo.cellIndex].colSpan = 1;
-        }
-        //  拆分成行
-        if (this.id === 'splitRow') {
-            
-        }
+        });
         hideRightMenu();
     });
     //  子级菜单点击事件
